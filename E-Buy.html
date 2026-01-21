@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE | Enterprise Store</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #2563eb;
+            --bg: #ffffff;
+            --surface: #f8fafc;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --card-bg: #ffffff;
+            --text-muted: #64748b;
+            --success: #10b981;
+        }
+
+        [data-theme="dark"] {
+            --bg: #020617;
+            --surface: #0f172a;
+            --border: #1e293b;
+            --text: #f1f5f9;
+            --card-bg: #1e293b;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.3s, border 0.3s; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; font-size: 14px; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            height: 70px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; background: var(--bg); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border);
+        }
+        .logo { font-weight: 700; font-size: 1.4rem; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        
+        .search-wrap { flex: 0 1 400px; margin: 0 20px; position: relative; }
+        .search-input { 
+            width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; 
+            border: 1px solid var(--border); background: var(--surface); color: var(--text);
+            outline: none;
+        }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+
+        .nav-tools { display: flex; gap: 15px; align-items: center; }
+        .tool-icon { 
+            cursor: pointer; position: relative; width: 42px; height: 42px; 
+            border-radius: 10px; background: var(--surface); display: flex; 
+            align-items: center; justify-content: center; 
+        }
+        .tool-icon svg { width: 20px; height: 20px; }
+        #cart-badge { position: absolute; top: -4px; right: -4px; background: var(--accent); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50px; border: 2px solid var(--bg); }
+
+        /* --- PRODUCT GRID --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px 5%; flex: 1; width: 100%; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+        
+        /* MOBILE GRID FIX */
+        @media (max-width: 600px) {
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            nav { padding: 0 15px; }
+            .search-wrap { display: none; } /* Hide search on mobile nav to save space */
+        }
+
+        .card { border: 1px solid var(--border); border-radius: 16px; padding: 16px; background: var(--card-bg); cursor: pointer; transition: 0.2s; }
+        .card:hover { border-color: var(--accent); transform: translateY(-4px); }
+        .card img { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; }
+        
+        @media (max-width: 600px) {
+            .card { padding: 10px; }
+            .card img { height: 140px; }
+        }
+
+        .card h3 { font-size: 1rem; margin-bottom: 4px; }
+        .card .price { font-weight: 700; font-size: 1.1rem; color: var(--accent); margin-bottom: 12px; }
+        .btn-add { width: 100%; padding: 10px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- FOOTER --- */
+        footer { background: var(--surface); border-top: 1px solid var(--border); padding: 40px 5%; margin-top: 50px; }
+        .footer-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .footer-info { color: var(--text-muted); }
+
+        /* --- MODALS --- */
+        .modal-overlay { 
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); 
+            z-index: 5000; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 20px;
+        }
+        .detail-box { 
+            background: var(--bg); width: 100%; max-width: 900px; border-radius: 24px; 
+            display: grid; grid-template-columns: 1fr 1.2fr; overflow: hidden; position: relative; max-height: 90vh;
+        }
+
+        /* MOBILE MODAL FIX */
+        @media (max-width: 768px) {
+            .detail-box { grid-template-columns: 1fr; overflow-y: auto; }
+            .detail-img { height: 250px; }
+        }
+
+        .detail-img { background: #f1f5f9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .detail-img img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-info { padding: 40px; overflow-y: auto; }
+        @media (max-width: 600px) { .detail-info { padding: 20px; } }
+
+        .spec-list { margin: 20px 0; }
+        .spec-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; z-index: 10; background: var(--bg); padding: 8px; border-radius: 50%; border: 1px solid var(--border); }
+
+        /* --- ADMIN PANEL --- */
+        #admin-panel { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 4000; overflow-y: auto; padding: 40px 5%; }
+        .admin-nav { display: flex; gap: 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+        .admin-nav-item { padding: 10px 20px; cursor: pointer; font-weight: 600; border-bottom: 2px solid transparent; }
+        .admin-nav-item.active { border-color: var(--accent); color: var(--accent); }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        
+        @media (max-width: 900px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+
+        .admin-section { background: var(--surface); padding: 30px; border-radius: 20px; border: 1px solid var(--border); }
+        .admin-input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem; }
+        
+        /* --- CART & CHECKOUT --- */
+        #cart-panel { position: fixed; top: 0; right: -100%; width: 380px; height: 100%; background: var(--bg); z-index: 2000; display: flex; flex-direction: column; transition: 0.4s; border-left: 1px solid var(--border); }
+        @media (max-width: 400px) { #cart-panel { width: 100%; } }
+        #cart-panel.open { right: 0; }
+        #cart-list { flex: 1; overflow-y: auto; padding: 20px; }
+        
+        .checkout-box { background: var(--bg); width: 100%; max-width: 450px; border-radius: 24px; padding: 30px; position: relative; }
+        .fulfillment-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+        .fulfillment-btn { padding: 12px; border: 1px solid var(--border); border-radius: 12px; text-align: center; cursor: pointer; font-weight: 600; background: var(--surface); }
+        .fulfillment-btn.active { border-color: var(--accent); background: #2563eb10; color: var(--accent); }
+
+        .report-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+
+        #toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 25px; border-radius: 8px; font-weight: 600; z-index: 6000; transition: 0.3s; }
+        #toast.show { bottom: 30px; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #user-receipt, #user-receipt * { visibility: visible; }
+            #user-receipt { position: fixed; left: 0; top: 0; width: 100%; border: none; padding: 20px; }
+        }
+        .receipt-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-outline { flex: 1; padding: 10px; background: transparent; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 5px; }
+    </style>
+</head>
+<body data-theme="light">
+
+    <nav>
+        <div class="logo"><i data-lucide="cpu"></i> CORE</div>
+        <div class="search-wrap">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="search-input" class="search-input" placeholder="Search products..." onkeyup="searchProducts()">
+        </div>
+        <div class="nav-tools">
+            <div class="tool-icon" onclick="toggleTheme()"><i data-lucide="sun" id="theme-btn-icon"></i></div>
+            <div class="tool-icon" onclick="togglePanel('cart-panel')">
+                <i data-lucide="shopping-cart"></i>
+                <span id="cart-badge">0</span>
+            </div>
+            <div class="tool-icon" style="background: var(--accent); color: white;" onclick="openAuth()"><i data-lucide="settings"></i></div>
+        </div>
+    </nav>
+
+    <div id="toast">Added to bag</div>
+
+    <main class="container">
+        <div class="grid" id="shop-grid"></div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="logo"><i data-lucide="cpu"></i> CORE</div>
+            <div class="footer-info">© 2026 CORE Enterprise Store. All rights reserved.</div>
+            <div style="display: flex; gap: 20px;">
+                <i data-lucide="twitter" style="cursor:pointer"></i>
+                <i data-lucide="github" style="cursor:pointer"></i>
+                <i data-lucide="linkedin" style="cursor:pointer"></i>
+            </div>
+        </div>
+    </footer>
+
+    <div id="checkout-modal" class="modal-overlay">
+        <div class="checkout-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="font-size: 1.4rem;">Complete Order</h2>
+                <i data-lucide="x" style="cursor:pointer" onclick="closeCheckout()"></i>
+            </div>
+            <form id="checkout-form" onsubmit="processOrder(event)">
+                <label>Contact Information</label>
+                <input type="text" id="cust-name" class="admin-input" placeholder="Full Name" required>
+                <input type="tel" id="cust-phone" class="admin-input" placeholder="Phone Number" required>
+                <label>Fulfillment Method</label>
+                <div class="fulfillment-options">
+                    <div id="btn-delivery" class="fulfillment-btn" onclick="setFulfillment('delivery')">
+                        <i data-lucide="truck" style="width:16px; margin-bottom:4px"></i><br>Delivery
+                    </div>
+                    <div id="btn-pickup" class="fulfillment-btn" onclick="setFulfillment('pickup')">
+                        <i data-lucide="store" style="width:16px; margin-bottom:4px"></i><br>Pickup
+                    </div>
+                </div>
+                <div id="address-field" style="display:none">
+                    <label>Delivery Address</label>
+                    <textarea id="cust-address" class="admin-input" style="height:60px" placeholder="Street, Building, City"></textarea>
+                </div>
+                <div id="pickup-info" style="display:none; padding:15px; background:var(--surface); border-radius:12px; margin-top:10px; border:1px solid var(--border)">
+                    <p style="font-size:0.8rem; color:var(--text-muted)">📍 Store: 123 Enterprise Way, Tech City. Ready in 20 mins.</p>
+                </div>
+                <div style="margin-top:20px; padding:15px; border-top:1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span>Total Amount</span>
+                        <strong id="checkout-total">$0</strong>
+                    </div>
+                    <button type="submit" class="btn-add" style="padding:15px; font-size:1rem;">Confirm & Place Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="report-modal" class="modal-overlay">
+        <div class="checkout-box" style="text-align: center; max-width: 500px;">
+            <div id="report-loading">
+                <i data-lucide="loader" class="spin" style="width: 40px; height: 40px; margin-bottom: 20px; color: var(--accent);"></i>
+                <h2>Processing Order...</h2>
+            </div>
+            <div id="report-content" style="display: none;">
+                <div style="background: #10b98120; color: #10b981; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <i data-lucide="check-circle" size="32"></i>
+                </div>
+                <h2 style="margin-bottom: 10px;">Order Confirmed!</h2>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Your order has been placed successfully.</p>
+                <div id="user-receipt" style="text-align: left; background: var(--surface); padding: 20px; border-radius: 12px; border: 1px dashed var(--border);"></div>
+                <div class="receipt-actions">
+                    <button class="btn-outline" onclick="window.print()"><i data-lucide="printer" size="16"></i> Print</button>
+                    <button class="btn-outline" onclick="downloadReceipt()"><i data-lucide="download" size="16"></i> Download</button>
+                </div>
+                <button class="btn-add" style="margin-top: 20px;" onclick="closeReport()">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="product-modal" class="modal-overlay" onclick="closeProductModal()">
+        <div class="detail-box" onclick="event.stopPropagation()">
+            <div class="close-modal" onclick="closeProductModal()"><i data-lucide="x"></i></div>
+            <div class="detail-img"><img id="modal-img" src=""></div>
+            <div class="detail-info">
+                <h2 id="modal-title">Name</h2>
+                <p id="modal-price" style="font-size: 1.5rem; font-weight: 700; color: var(--accent); margin-top: 5px;">$0</p>
+                <div id="modal-specs" class="spec-list"></div>
+                <p id="modal-desc" style="color: var(--text-muted); line-height: 1.6; margin-top: 15px;"></p>
+                <button class="btn-add" id="modal-add-btn" style="padding: 15px; margin-top: 20px;">Add to Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="cart-panel">
+        <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
+            <h3>Your Bag</h3>
+            <i data-lucide="x" style="cursor:pointer" onclick="togglePanel('cart-panel')"></i>
+        </div>
+        <div id="cart-list"></div>
+        <div style="padding: 20px; border-top: 1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-weight:700;">
+                <span>Total</span><span id="total-price">$0</span>
+            </div>
+            <button class="btn-add" onclick="openCheckout()">Checkout</button>
+        </div>
+    </div>
+
+    <div id="admin-panel">
+        <div style="display:flex; justify-content:space-between; margin-bottom: 10px;">
+            <h2>Management Console</h2>
+            <div class="tool-icon" onclick="togglePanel('admin-panel')"><i data-lucide="x"></i></div>
+        </div>
+        <div class="admin-nav">
+            <div class="admin-nav-item active" id="tab-inventory" onclick="switchAdminTab('inventory')">Inventory</div>
+            <div class="admin-nav-item" id="tab-orders" onclick="switchAdminTab('orders')">Orders Received</div>
+        </div>
+        <div id="view-inventory" class="admin-grid">
+            <div class="admin-section">
+                <h3>Add New Product</h3>
+                <label>Product Name</label><input type="text" id="p-name" class="admin-input">
+                <label>Category</label>
+                <select id="p-cat" class="admin-input">
+                    <option value="Laptop">Laptop</option>
+                    <option value="Monitor">Monitor</option>
+                    <option value="Networking">Networking</option>
+                    <option value="Enterprise">Enterprise</option>
+                </select>
+                <label>Price ($)</label><input type="number" id="p-price" class="admin-input">
+                <label>Short Description</label><textarea rows="4" id="p-desc" class="admin-input" style="height: 80px;"></textarea>
+                <label>Specifications (Key: Value, comma separated)</label><input type="text" id="p-specs" class="admin-input" placeholder="e.g. RAM: 16GB, Storage: 512GB">
+                <label>Product Image</label>
+                <div onclick="document.getElementById('file-in').click()" style="border: 2px dashed var(--border); padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; background: var(--bg);">Click to Upload<input type="file" id="file-in" hidden></div>
+                <img id="prev" style="width: 100px; display:none; margin-top: 15px; border-radius: 8px;">
+                <button class="btn-add" style="margin-top: 25px; padding: 15px;" onclick="saveNewProduct()">Push to Store</button>
+            </div>
+            <div class="admin-section" style="background: transparent;">
+                <h3>Active Store Items</h3>
+                <div id="admin-inventory-list" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+        <div id="view-orders" style="display:none;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;" id="admin-orders-list"></div>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div style="background: var(--bg); padding: 30px; border-radius: 20px; width: 300px; text-align: center;">
+            <h2 style="margin-bottom: 10px;">Admin Access</h2>
+            <input type="text" id="user" class="admin-input" placeholder="User">
+            <input type="password" id="pass" class="admin-input" placeholder="Pass">
+            <button class="btn-add" onclick="doLogin()">Login</button>
+            <p onclick="closeAuth()" style="margin-top: 15px; cursor:pointer; font-size: 0.8rem; opacity: 0.6;">Cancel</p>
+        </div>
+    </div>
+
+    <script>
+        let products = JSON.parse(localStorage.getItem('core_products')) || [
+    { 
+        id: 1, 
+        name: "MacBook Pro M3", 
+        price: 2499, 
+        cat: "Laptop", 
+        warranty: "2 Years AppleCare+", 
+        desc: "The most advanced chips ever built for personal computers.", 
+        specs: {"Processor": "M3 Max", "Memory": "32GB", "Storage": "1TB SSD"}, 
+        img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500" 
+    },
+    { 
+        id: 2, 
+        name: "Dell XPS 15", 
+        price: 1899, 
+        cat: "Laptop", 
+        warranty: "1 Year Premium", 
+        desc: "Stunning OLED display with powerhouse performance.", 
+        specs: {"Processor": "Intel i9", "Memory": "16GB", "GPU": "RTX 4060"}, 
+        img: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500" 
+    },
+    { 
+        id: 3, 
+        name: "iPhone 15 Pro", 
+        price: 999, 
+        cat: "Phone", 
+        warranty: "1 Year", 
+        desc: "Forged in titanium. Featuring the A17 Pro chip.", 
+        specs: {"Chip": "A17 Pro", "Camera": "48MP Main", "Finish": "Natural Titanium"}, 
+        img: "https://unsplash.com/photos/a-black-iphone-sitting-on-top-of-a-table-5hJm7ZCc_zw" 
+    },
+    { 
+        id: 4, 
+        name: "iPad Pro 12.9", 
+        price: 1099, 
+        cat: "Tablet", 
+        warranty: "1 Year", 
+        desc: "The ultimate iPad experience with Liquid Retina XDR.", 
+        specs: {"Display": "Mini-LED", "Chip": "M2", "Storage": "256GB"}, 
+        img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500" 
+    },
+    { 
+        id: 5, 
+        name: "Razer Blade 16", 
+        price: 2999, 
+        cat: "Laptop", 
+        warranty: "2 Years", 
+        desc: "The pinnacle of gaming performance and portability.", 
+        specs: {"GPU": "RTX 4090", "Screen": "240Hz Dual-Mode", "Memory": "32GB"}, 
+        img: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=500" 
+    },
+    { 
+        id: 6, 
+        name: "Surface Laptop 5", 
+        price: 1299, 
+        cat: "Laptop", 
+        warranty: "1 Year", 
+        desc: "Sleek, fast, and elegant for your daily productivity.", 
+        specs: {"Processor": "Intel i7", "Screen": "PixelSense", "Battery": "18 Hours"}, 
+        img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500" 
+    },
+    {   
+        id: 7, 
+        name: "Samsung Galaxy S24 Ultra", 
+        price: 1199, 
+        cat: "Phone", 
+        warranty: "1 Year", 
+        desc: "AI-powered mobile experience with an integrated S Pen.", 
+        specs: {"Camera": "200MP", "Battery": "5000mAh", "Screen": "QHD+"}, 
+        img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500" 
+    },
+    { 
+        id: 8, 
+        name: "ThinkPad X1 Carbon", 
+        price: 1649, 
+        cat: "Laptop", 
+        warranty: "3 Years Business", 
+        desc: "Legendary durability and the world's best keyboard.", 
+        specs: {"Weight": "2.4 lbs", "Security": "Fingerprint/vPro", "OS": "Win 11 Pro"}, 
+        img: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=500" 
+    }
+];
+        let orders = JSON.parse(localStorage.getItem('core_orders')) || [];
+        let cart = [];
+        let tempImg = "";
+        let fulfillmentType = 'pickup';
+        let currentReceiptData = null;
+
+        function searchProducts() { render(document.getElementById('search-input').value.toLowerCase()); }
+
+        function render(searchTerm = "") {
+            const grid = document.getElementById('shop-grid');
+            const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm) || p.cat.toLowerCase().includes(searchTerm));
+            grid.innerHTML = filtered.map(p => `
+                <div class="card" onclick="openProductModal(${p.id})">
+                    <img src="${p.img}"><p style="font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase;">${p.cat}</p>
+                    <h3>${p.name}</h3><div class="price">$${p.price.toLocaleString()}</div>
+                    <button class="btn-add" onclick="event.stopPropagation(); addToCart(${p.id})"><i data-lucide="plus" size="16"></i> Add to Bag</button>
+                </div>`).join('');
+            document.getElementById('admin-inventory-list').innerHTML = products.map(p => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); padding:12px; border-radius:10px; margin-bottom:8px; border: 1px solid var(--border);">
+                    <div style="display:flex; gap:10px; align-items:center"><img src="${p.img}" style="width:30px; height:30px; border-radius:4px"><div><strong>${p.name}</strong><br><small>$${p.price}</small></div></div>
+                    <i data-lucide="trash-2" style="color:red; cursor:pointer" onclick="delP(${p.id})"></i>
+                </div>`).join('');
+            renderAdminOrders();
+            lucide.createIcons();
+            localStorage.setItem('core_products', JSON.stringify(products));
+            localStorage.setItem('core_orders', JSON.stringify(orders));
+        }
+
+        function renderAdminOrders() {
+            const list = document.getElementById('admin-orders-list');
+            if(orders.length === 0) { list.innerHTML = `<p>No orders yet.</p>`; return; }
+            list.innerHTML = orders.map(o => `
+                <div class="report-card">
+                    <div style="display:flex; justify-content:space-between;"><span class="status-badge status-pending">New</span><small>${o.date}</small></div>
+                    <h3>${o.customer.name}</h3><p>${o.customer.phone}</p><p>Method: ${o.fulfillment.toUpperCase()}</p>
+                    <div style="margin-top:10px; border-top: 1px solid var(--border)">${o.items.map(i => `<small style="display:block">• ${i.name}</small>`).join('')}<strong>Total: ${o.total}</strong></div>
+                    <button onclick="deleteOrder(${o.id})" style="color:red; background:none; border:none; cursor:pointer; margin-top:10px;">Clear</button>
+                </div>`).join('');
+        }
+
+        function openCheckout() {
+            if(cart.length === 0) return alert("Your bag is empty!");
+            togglePanel('cart-panel');
+            document.getElementById('checkout-modal').style.display = 'flex';
+            document.getElementById('checkout-total').innerText = document.getElementById('total-price').innerText;
+            setFulfillment('pickup');
+        }
+
+        function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
+
+        function setFulfillment(type) {
+            fulfillmentType = type;
+            document.getElementById('btn-delivery').classList.toggle('active', type === 'delivery');
+            document.getElementById('btn-pickup').classList.toggle('active', type === 'pickup');
+            document.getElementById('address-field').style.display = type === 'delivery' ? 'block' : 'none';
+            document.getElementById('pickup-info').style.display = type === 'pickup' ? 'block' : 'none';
+        }
+
+        function processOrder(e) {
+            e.preventDefault();
+            const orderData = {
+                id: Date.now(),
+                date: new Date().toLocaleString(),
+                customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value },
+                fulfillment: fulfillmentType,
+                address: fulfillmentType === 'delivery' ? document.getElementById('cust-address').value : null,
+                items: [...cart],
+                total: document.getElementById('checkout-total').innerText
+            };
+            currentReceiptData = orderData;
+            orders.unshift(orderData);
+            closeCheckout();
+            showReport(orderData);
+        }
+
+        function showReport(order) {
+            const modal = document.getElementById('report-modal');
+            const loader = document.getElementById('report-loading');
+            const content = document.getElementById('report-content');
+            const receipt = document.getElementById('user-receipt');
+            modal.style.display = 'flex';
+            loader.style.display = 'block';
+            content.style.display = 'none';
+
+            receipt.innerHTML = `
+                <div style="margin-bottom:10px; font-size:0.8rem; border-bottom:1px solid var(--border); padding-bottom:10px">
+                    <strong>Order ID:</strong> #${order.id}<br><strong>Date:</strong> ${order.date}
+                </div>
+                <div style="margin-bottom:10px">${order.items.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.name}</span><span>$${i.price}</span></div>`).join('')}</div>
+                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--accent); font-size:1.1rem; border-top:1px solid var(--border); padding-top:10px">
+                    <span>Total</span><span>${order.total}</span>
+                </div>
+                <div style="margin-top:15px; font-size:0.8rem;">
+                    <strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}<br>
+                    ${order.address ? `<strong>Address:</strong> ${order.address}` : '<strong>Pickup:</strong> CORE Store Main'}
+                </div>`;
+
+            setTimeout(() => {
+                loader.style.display = 'none'; content.style.display = 'block';
+                cart = []; updateCart(); render();
+            }, 1500);
+        }
+
+        function downloadReceipt() {
+            if(!currentReceiptData) return;
+            const o = currentReceiptData;
+            let text = `CORE ENTERPRISE RECEIPT\nOrder ID: #${o.id}\nDate: ${o.date}\n\nITEMS:\n`;
+            o.items.forEach(i => text += `- ${i.name}: $${i.price}\n`);
+            text += `\nTOTAL: ${o.total}\nMETHOD: ${o.fulfillment.toUpperCase()}`;
+            if(o.address) text += `\nADDRESS: ${o.address}`;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `CORE_Receipt_${o.id}.txt`;
+            a.click(); URL.revokeObjectURL(url);
+        }
+
+        function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+        function switchAdminTab(tab) {
+            document.getElementById('tab-inventory').classList.toggle('active', tab === 'inventory');
+            document.getElementById('tab-orders').classList.toggle('active', tab === 'orders');
+            document.getElementById('view-inventory').style.display = tab === 'inventory' ? 'grid' : 'none';
+            document.getElementById('view-orders').style.display = tab === 'orders' ? 'block' : 'none';
+            lucide.createIcons();
+        }
+        function deleteOrder(id) { orders = orders.filter(o => o.id !== id); render(); }
+
+        function openProductModal(id) {
+            const p = products.find(x => x.id === id);
+            if(!p) return;
+            document.getElementById('modal-img').src = p.img;
+            document.getElementById('modal-title').innerText = p.name;
+            document.getElementById('modal-price').innerText = `$${p.price.toLocaleString()}`;
+            document.getElementById('modal-desc').innerText = p.desc || "Enterprise hardware.";
+            
+            let specHtml = `<div class="spec-item"><strong>Warranty</strong><span>${p.warranty || '2 Years'}</span></div>`;
+            if (p.specs) {
+                for(let key in p.specs) {
+                    specHtml += `<div class="spec-item"><strong>${key}</strong><span>${p.specs[key]}</span></div>`;
+                }
+            }
+            document.getElementById('modal-specs').innerHTML = specHtml;
+            document.getElementById('modal-add-btn').onclick = () => addToCart(p.id);
+            document.getElementById('product-modal').style.display = 'flex';
+        }
+
+        function closeProductModal() { document.getElementById('product-modal').style.display = 'none'; }
+        
+        function addToCart(id) {
+            const item = products.find(p => p.id === id);
+            cart.push(item); updateCart();
+            const t = document.getElementById('toast');
+            t.innerText = `Added ${item.name} to bag`;
+            t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        function updateCart() {
+            document.getElementById('cart-badge').innerText = cart.length;
+            document.getElementById('cart-list').innerHTML = cart.map((item, i) => `
+                <div style="display:flex; gap:12px; padding: 15px; align-items:center">
+                    <img src="${item.img}" style="width:40px; height:40px; border-radius:5px; object-fit:cover">
+                    <div style="flex-grow:1"><strong>${item.name}</strong><br>$${item.price}</div>
+                    <i data-lucide="trash" size="14" style="color:red; cursor:pointer" onclick="cart.splice(${i},1); updateCart();"></i>
+                </div>`).join('');
+            document.getElementById('total-price').innerText = "$" + cart.reduce((s, i) => s + i.price, 0).toLocaleString();
+            lucide.createIcons();
+        }
+
+        function toggleTheme() {
+            const b = document.body;
+            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+            lucide.createIcons();
+        }
+
+        function togglePanel(id) {
+            const p = document.getElementById(id);
+            if(id === 'admin-panel') p.style.display = p.style.display === 'block' ? 'none' : 'block';
+            else p.classList.toggle('open');
+            lucide.createIcons();
+        }
+
+        function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
+        function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+        function doLogin() {
+            if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === '123') {
+                closeAuth(); togglePanel('admin-panel');
+            } else alert("Wrong credentials");
+        }
+
+        function saveNewProduct() {
+            const n = document.getElementById('p-name').value;
+            const p = document.getElementById('p-price').value;
+            const d = document.getElementById('p-desc').value;
+            const s = document.getElementById('p-specs').value; 
+            
+            if(n && p && tempImg) {
+                const specsObj = {};
+                if(s) {
+                    s.split(',').forEach(pair => {
+                        const [key, val] = pair.split(':');
+                        if(key && val) specsObj[key.trim()] = val.trim();
+                    });
+                }
+                products.unshift({ 
+                    id: Date.now(), 
+                    name: n, 
+                    cat: document.getElementById('p-cat').value, 
+                    price: parseInt(p), 
+                    img: tempImg, 
+                    desc: d,
+                    specs: specsObj 
+                });
+                document.getElementById('p-name').value = '';
+                document.getElementById('p-price').value = '';
+                document.getElementById('p-desc').value = '';
+                document.getElementById('p-specs').value = '';
+                document.getElementById('prev').style.display = 'none';
+                tempImg = "";
+                render(); alert("Added!");
+            } else alert("Fill name, price, and upload image");
+        }
+
+        document.getElementById('file-in').onchange = (e) => {
+            const r = new FileReader();
+            r.onload = (ev) => { tempImg = ev.target.result; document.getElementById('prev').src = tempImg; document.getElementById('prev').style.display = 'block'; };
+            r.readAsDataURL(e.target.files[0]);
+        };
+        function delP(id) { products = products.filter(p => p.id !== id); render(); }
+        render();
+    </script>
+</body>
+</html>
