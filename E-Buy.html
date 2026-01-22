@@ -323,317 +323,291 @@
     </div>
 
     <script>
-        let products = JSON.parse(localStorage.getItem('core_products')) || [
-    { 
-        id: 1, 
-        name: "MacBook Pro M3", 
-        price: 2499, 
-        cat: "Laptop", 
-        warranty: "2 Years AppleCare+", 
-        desc: "The most advanced chips ever built for personal computers.", 
-        specs: {"Processor": "M3 Max", "Memory": "32GB", "Storage": "1TB SSD"}, 
-        img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500" 
-    },
-    { 
-        id: 2, 
-        name: "Dell XPS 15", 
-        price: 1899, 
-        cat: "Laptop", 
-        warranty: "1 Year Premium", 
-        desc: "Stunning OLED display with powerhouse performance.", 
-        specs: {"Processor": "Intel i9", "Memory": "16GB", "GPU": "RTX 4060"}, 
-        img: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500" 
-    },
-    { 
-        id: 3, 
-        name: "iPhone 15 Pro", 
-        price: 999, 
-        cat: "Phone", 
-        warranty: "1 Year", 
-        desc: "Forged in titanium. Featuring the A17 Pro chip.", 
-        specs: {"Chip": "A17 Pro", "Camera": "48MP Main", "Finish": "Natural Titanium"}, 
-        img: "https://unsplash.com/photos/a-black-iphone-sitting-on-top-of-a-table-5hJm7ZCc_zw" 
-    },
-    { 
-        id: 4, 
-        name: "iPad Pro 12.9", 
-        price: 1099, 
-        cat: "Tablet", 
-        warranty: "1 Year", 
-        desc: "The ultimate iPad experience with Liquid Retina XDR.", 
-        specs: {"Display": "Mini-LED", "Chip": "M2", "Storage": "256GB"}, 
-        img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500" 
-    },
-    { 
-        id: 5, 
-        name: "Razer Blade 16", 
-        price: 2999, 
-        cat: "Laptop", 
-        warranty: "2 Years", 
-        desc: "The pinnacle of gaming performance and portability.", 
-        specs: {"GPU": "RTX 4090", "Screen": "240Hz Dual-Mode", "Memory": "32GB"}, 
-        img: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=500" 
-    },
-    { 
-        id: 6, 
-        name: "Surface Laptop 5", 
-        price: 1299, 
-        cat: "Laptop", 
-        warranty: "1 Year", 
-        desc: "Sleek, fast, and elegant for your daily productivity.", 
-        specs: {"Processor": "Intel i7", "Screen": "PixelSense", "Battery": "18 Hours"}, 
-        img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500" 
-    },
-    {   
-        id: 7, 
-        name: "Samsung Galaxy S24 Ultra", 
-        price: 1199, 
-        cat: "Phone", 
-        warranty: "1 Year", 
-        desc: "AI-powered mobile experience with an integrated S Pen.", 
-        specs: {"Camera": "200MP", "Battery": "5000mAh", "Screen": "QHD+"}, 
-        img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500" 
-    },
-    { 
-        id: 8, 
-        name: "ThinkPad X1 Carbon", 
-        price: 1649, 
-        cat: "Laptop", 
-        warranty: "3 Years Business", 
-        desc: "Legendary durability and the world's best keyboard.", 
-        specs: {"Weight": "2.4 lbs", "Security": "Fingerprint/vPro", "OS": "Win 11 Pro"}, 
-        img: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=500" 
-    }
-];
-        let orders = JSON.parse(localStorage.getItem('core_orders')) || [];
-        let cart = [];
-        let tempImg = "";
-        let fulfillmentType = 'pickup';
-        let currentReceiptData = null;
+    // Initial data with the corrected iPhone image URL
+    const defaultProducts = [
+        { id: 1, name: "MacBook Pro M3", price: 2499, cat: "Laptop", warranty: "2 Years AppleCare+", desc: "The most advanced chips ever built for personal computers.", specs: {"Processor": "M3 Max", "Memory": "32GB", "Storage": "1TB SSD"}, img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500" },
+        { id: 2, name: "Dell XPS 15", price: 1899, cat: "Laptop", warranty: "1 Year Premium", desc: "Stunning OLED display with powerhouse performance.", specs: {"Processor": "Intel i9", "Memory": "16GB", "GPU": "RTX 4060"}, img: "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=500" },
+        { id: 3, name: "iPhone 15 Pro", price: 999, cat: "Phone", warranty: "1 Year", desc: "Forged in titanium. Featuring the A17 Pro chip.", specs: {"Chip": "A17 Pro", "Camera": "48MP Main", "Finish": "Natural Titanium"}, img: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500" },
+        { id: 4, name: "iPad Pro 12.9", price: 1099, cat: "Tablet", warranty: "1 Year", desc: "The ultimate iPad experience with Liquid Retina XDR.", specs: {"Display": "Mini-LED", "Chip": "M2", "Storage": "256GB"}, img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=500" },
+        { id: 5, name: "Razer Blade 16", price: 2999, cat: "Laptop", warranty: "2 Years", desc: "The pinnacle of gaming performance and portability.", specs: {"GPU": "RTX 4090", "Screen": "240Hz Dual-Mode", "Memory": "32GB"}, img: "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=500" },
+        { id: 6, name: "Surface Laptop 5", price: 1299, cat: "Laptop", warranty: "1 Year", desc: "Sleek, fast, and elegant for your daily productivity.", specs: {"Processor": "Intel i7", "Screen": "PixelSense", "Battery": "18 Hours"}, img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500" },
+        { id: 7, name: "Samsung Galaxy S24 Ultra", price: 1199, cat: "Phone", warranty: "1 Year", desc: "AI-powered mobile experience with an integrated S Pen.", specs: {"Camera": "200MP", "Battery": "5000mAh", "Screen": "QHD+"}, img: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=500" },
+        { id: 8, name: "ThinkPad X1 Carbon", price: 1649, cat: "Laptop", warranty: "3 Years Business", desc: "Legendary durability and the world's best keyboard.", specs: {"Weight": "2.4 lbs", "Security": "Fingerprint/vPro", "OS": "Win 11 Pro"}, img: "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=500" }
+    ];
 
-        function searchProducts() { render(document.getElementById('search-input').value.toLowerCase()); }
+    // Load data from LocalStorage or use defaults
+    let products = JSON.parse(localStorage.getItem('core_products')) || defaultProducts;
+    let orders = JSON.parse(localStorage.getItem('core_orders')) || [];
+    let cart = [];
+    let tempImg = "";
+    let fulfillmentType = 'pickup';
+    let currentReceiptData = null;
 
-        function render(searchTerm = "") {
-            const grid = document.getElementById('shop-grid');
-            const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm) || p.cat.toLowerCase().includes(searchTerm));
-            grid.innerHTML = filtered.map(p => `
-                <div class="card" onclick="openProductModal(${p.id})">
-                    <img src="${p.img}"><p style="font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase;">${p.cat}</p>
-                    <h3>${p.name}</h3><div class="price">$${p.price.toLocaleString()}</div>
-                    <button class="btn-add" onclick="event.stopPropagation(); addToCart(${p.id})"><i data-lucide="plus" size="16"></i> Add to Bag</button>
-                </div>`).join('');
-            document.getElementById('admin-inventory-list').innerHTML = products.map(p => `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); padding:12px; border-radius:10px; margin-bottom:8px; border: 1px solid var(--border);">
-                    <div style="display:flex; gap:10px; align-items:center"><img src="${p.img}" style="width:30px; height:30px; border-radius:4px"><div><strong>${p.name}</strong><br><small>$${p.price}</small></div></div>
-                    <i data-lucide="trash-2" style="color:red; cursor:pointer" onclick="delP(${p.id})"></i>
-                </div>`).join('');
-            renderAdminOrders();
-            lucide.createIcons();
-            localStorage.setItem('core_products', JSON.stringify(products));
-            localStorage.setItem('core_orders', JSON.stringify(orders));
-        }
+    function searchProducts() { render(document.getElementById('search-input').value.toLowerCase()); }
 
-        function renderAdminOrders() {
-            const list = document.getElementById('admin-orders-list');
-            if(orders.length === 0) { list.innerHTML = `<p>No orders yet.</p>`; return; }
-            list.innerHTML = orders.map(o => `
-                <div class="report-card">
-                    <div style="display:flex; justify-content:space-between;"><span class="status-badge status-pending">New</span><small>${o.date}</small></div>
-                    <h3>${o.customer.name}</h3><p>${o.customer.phone}</p><p>Method: ${o.fulfillment.toUpperCase()}</p>
-                    <div style="margin-top:10px; border-top: 1px solid var(--border)">${o.items.map(i => `<small style="display:block">• ${i.name}</small>`).join('')}<strong>Total: ${o.total}</strong></div>
-                    <button onclick="deleteOrder(${o.id})" style="color:red; background:none; border:none; cursor:pointer; margin-top:10px;">Clear</button>
-                </div>`).join('');
-        }
-
-        function openCheckout() {
-            if(cart.length === 0) return alert("Your bag is empty!");
-            togglePanel('cart-panel');
-            document.getElementById('checkout-modal').style.display = 'flex';
-            document.getElementById('checkout-total').innerText = document.getElementById('total-price').innerText;
-            setFulfillment('pickup');
-        }
-
-        function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
-
-        function setFulfillment(type) {
-            fulfillmentType = type;
-            document.getElementById('btn-delivery').classList.toggle('active', type === 'delivery');
-            document.getElementById('btn-pickup').classList.toggle('active', type === 'pickup');
-            document.getElementById('address-field').style.display = type === 'delivery' ? 'block' : 'none';
-            document.getElementById('pickup-info').style.display = type === 'pickup' ? 'block' : 'none';
-        }
-
-        function processOrder(e) {
-            e.preventDefault();
-            const orderData = {
-                id: Date.now(),
-                date: new Date().toLocaleString(),
-                customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value },
-                fulfillment: fulfillmentType,
-                address: fulfillmentType === 'delivery' ? document.getElementById('cust-address').value : null,
-                items: [...cart],
-                total: document.getElementById('checkout-total').innerText
-            };
-            currentReceiptData = orderData;
-            orders.unshift(orderData);
-            closeCheckout();
-            showReport(orderData);
-        }
-
-        function showReport(order) {
-            const modal = document.getElementById('report-modal');
-            const loader = document.getElementById('report-loading');
-            const content = document.getElementById('report-content');
-            const receipt = document.getElementById('user-receipt');
-            modal.style.display = 'flex';
-            loader.style.display = 'block';
-            content.style.display = 'none';
-
-            receipt.innerHTML = `
-                <div style="margin-bottom:10px; font-size:0.8rem; border-bottom:1px solid var(--border); padding-bottom:10px">
-                    <strong>Order ID:</strong> #${order.id}<br><strong>Date:</strong> ${order.date}
-                </div>
-                <div style="margin-bottom:10px">${order.items.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.name}</span><span>$${i.price}</span></div>`).join('')}</div>
-                <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--accent); font-size:1.1rem; border-top:1px solid var(--border); padding-top:10px">
-                    <span>Total</span><span>${order.total}</span>
-                </div>
-                <div style="margin-top:15px; font-size:0.8rem;">
-                    <strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}<br>
-                    ${order.address ? `<strong>Address:</strong> ${order.address}` : '<strong>Pickup:</strong> CORE Store Main'}
-                </div>`;
-
-            setTimeout(() => {
-                loader.style.display = 'none'; content.style.display = 'block';
-                cart = []; updateCart(); render();
-            }, 1500);
-        }
-
-        function downloadReceipt() {
-            if(!currentReceiptData) return;
-            const o = currentReceiptData;
-            let text = `CORE ENTERPRISE RECEIPT\nOrder ID: #${o.id}\nDate: ${o.date}\n\nITEMS:\n`;
-            o.items.forEach(i => text += `- ${i.name}: $${i.price}\n`);
-            text += `\nTOTAL: ${o.total}\nMETHOD: ${o.fulfillment.toUpperCase()}`;
-            if(o.address) text += `\nADDRESS: ${o.address}`;
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `CORE_Receipt_${o.id}.txt`;
-            a.click(); URL.revokeObjectURL(url);
-        }
-
-        function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
-        function switchAdminTab(tab) {
-            document.getElementById('tab-inventory').classList.toggle('active', tab === 'inventory');
-            document.getElementById('tab-orders').classList.toggle('active', tab === 'orders');
-            document.getElementById('view-inventory').style.display = tab === 'inventory' ? 'grid' : 'none';
-            document.getElementById('view-orders').style.display = tab === 'orders' ? 'block' : 'none';
-            lucide.createIcons();
-        }
-        function deleteOrder(id) { orders = orders.filter(o => o.id !== id); render(); }
-
-        function openProductModal(id) {
-            const p = products.find(x => x.id === id);
-            if(!p) return;
-            document.getElementById('modal-img').src = p.img;
-            document.getElementById('modal-title').innerText = p.name;
-            document.getElementById('modal-price').innerText = `$${p.price.toLocaleString()}`;
-            document.getElementById('modal-desc').innerText = p.desc || "Enterprise hardware.";
-            
-            let specHtml = `<div class="spec-item"><strong>Warranty</strong><span>${p.warranty || '2 Years'}</span></div>`;
-            if (p.specs) {
-                for(let key in p.specs) {
-                    specHtml += `<div class="spec-item"><strong>${key}</strong><span>${p.specs[key]}</span></div>`;
-                }
-            }
-            document.getElementById('modal-specs').innerHTML = specHtml;
-            document.getElementById('modal-add-btn').onclick = () => addToCart(p.id);
-            document.getElementById('product-modal').style.display = 'flex';
-        }
-
-        function closeProductModal() { document.getElementById('product-modal').style.display = 'none'; }
+    function render(searchTerm = "") {
+        const grid = document.getElementById('shop-grid');
+        const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm) || p.cat.toLowerCase().includes(searchTerm));
         
-        function addToCart(id) {
-            const item = products.find(p => p.id === id);
-            cart.push(item); updateCart();
-            const t = document.getElementById('toast');
-            t.innerText = `Added ${item.name} to bag`;
-            t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000);
-        }
+        grid.innerHTML = filtered.map(p => `
+            <div class="card" onclick="openProductModal(${p.id})">
+                <img src="${p.img}"><p style="font-size: 0.7rem; color: var(--accent); font-weight: 700; text-transform: uppercase;">${p.cat}</p>
+                <h3>${p.name}</h3><div class="price">$${p.price.toLocaleString()}</div>
+                <button class="btn-add" onclick="event.stopPropagation(); addToCart(${p.id})"><i data-lucide="plus" size="16"></i> Add to Bag</button>
+            </div>`).join('');
 
-        function updateCart() {
-            document.getElementById('cart-badge').innerText = cart.length;
-            document.getElementById('cart-list').innerHTML = cart.map((item, i) => `
-                <div style="display:flex; gap:12px; padding: 15px; align-items:center">
-                    <img src="${item.img}" style="width:40px; height:40px; border-radius:5px; object-fit:cover">
-                    <div style="flex-grow:1"><strong>${item.name}</strong><br>$${item.price}</div>
-                    <i data-lucide="trash" size="14" style="color:red; cursor:pointer" onclick="cart.splice(${i},1); updateCart();"></i>
-                </div>`).join('');
-            document.getElementById('total-price').innerText = "$" + cart.reduce((s, i) => s + i.price, 0).toLocaleString();
-            lucide.createIcons();
-        }
-
-        function toggleTheme() {
-            const b = document.body;
-            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-            lucide.createIcons();
-        }
-
-        function togglePanel(id) {
-            const p = document.getElementById(id);
-            if(id === 'admin-panel') p.style.display = p.style.display === 'block' ? 'none' : 'block';
-            else p.classList.toggle('open');
-            lucide.createIcons();
-        }
-
-        function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
-        function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
-        function doLogin() {
-            if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === '123') {
-                closeAuth(); togglePanel('admin-panel');
-            } else alert("Wrong credentials");
-        }
-
-        function saveNewProduct() {
-            const n = document.getElementById('p-name').value;
-            const p = document.getElementById('p-price').value;
-            const d = document.getElementById('p-desc').value;
-            const s = document.getElementById('p-specs').value; 
+        document.getElementById('admin-inventory-list').innerHTML = products.map(p => `
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); padding:12px; border-radius:10px; margin-bottom:8px; border: 1px solid var(--border);">
+                <div style="display:flex; gap:10px; align-items:center"><img src="${p.img}" style="width:30px; height:30px; border-radius:4px; object-fit:cover"><div><strong>${p.name}</strong><br><small>$${p.price}</small></div></div>
+                <i data-lucide="trash-2" style="color:red; cursor:pointer" onclick="delP(${p.id})"></i>
+            </div>`).join('');
             
-            if(n && p && tempImg) {
-                const specsObj = {};
-                if(s) {
-                    s.split(',').forEach(pair => {
-                        const [key, val] = pair.split(':');
-                        if(key && val) specsObj[key.trim()] = val.trim();
-                    });
-                }
-                products.unshift({ 
-                    id: Date.now(), 
-                    name: n, 
-                    cat: document.getElementById('p-cat').value, 
-                    price: parseInt(p), 
-                    img: tempImg, 
-                    desc: d,
-                    specs: specsObj 
-                });
-                document.getElementById('p-name').value = '';
-                document.getElementById('p-price').value = '';
-                document.getElementById('p-desc').value = '';
-                document.getElementById('p-specs').value = '';
-                document.getElementById('prev').style.display = 'none';
-                tempImg = "";
-                render(); alert("Added!");
-            } else alert("Fill name, price, and upload image");
-        }
+        renderAdminOrders();
+        lucide.createIcons();
+        
+        // Always sync the current state to LocalStorage
+        localStorage.setItem('core_products', JSON.stringify(products));
+        localStorage.setItem('core_orders', JSON.stringify(orders));
+    }
 
-        document.getElementById('file-in').onchange = (e) => {
-            const r = new FileReader();
-            r.onload = (ev) => { tempImg = ev.target.result; document.getElementById('prev').src = tempImg; document.getElementById('prev').style.display = 'block'; };
-            r.readAsDataURL(e.target.files[0]);
+    function renderAdminOrders() {
+        const list = document.getElementById('admin-orders-list');
+        if(!orders || orders.length === 0) { list.innerHTML = `<p>No orders yet.</p>`; return; }
+        
+        list.innerHTML = orders.map(o => {
+            // Safety check for older/corrupted order data
+            const name = o.customer ? o.customer.name : "Unknown";
+            const phone = o.customer ? o.customer.phone : "N/A";
+            
+            return `
+            <div class="report-card">
+                <div style="display:flex; justify-content:space-between;"><span class="status-badge status-pending">New</span><small>${o.date}</small></div>
+                <h3>${name}</h3><p>${phone}</p><p>Method: ${(o.fulfillment || 'pickup').toUpperCase()}</p>
+                <div style="margin-top:10px; border-top: 1px solid var(--border)">
+                    ${(o.items || []).map(i => `<small style="display:block">• ${i.name}</small>`).join('')}
+                    <strong>Total: ${o.total}</strong>
+                </div>
+                <button onclick="deleteOrder(${o.id})" style="color:red; background:none; border:none; cursor:pointer; margin-top:10px;">Clear</button>
+            </div>`}).join('');
+    }
+
+    function openCheckout() {
+        if(cart.length === 0) return alert("Your bag is empty!");
+        togglePanel('cart-panel');
+        document.getElementById('checkout-modal').style.display = 'flex';
+        document.getElementById('checkout-total').innerText = document.getElementById('total-price').innerText;
+        setFulfillment('pickup');
+    }
+
+    function closeCheckout() { document.getElementById('checkout-modal').style.display = 'none'; }
+
+    function setFulfillment(type) {
+        fulfillmentType = type;
+        document.getElementById('btn-delivery').classList.toggle('active', type === 'delivery');
+        document.getElementById('btn-pickup').classList.toggle('active', type === 'pickup');
+        document.getElementById('address-field').style.display = type === 'delivery' ? 'block' : 'none';
+        document.getElementById('pickup-info').style.display = type === 'pickup' ? 'block' : 'none';
+    }
+
+    function processOrder(e) {
+        e.preventDefault();
+        const orderData = {
+            id: Date.now(),
+            date: new Date().toLocaleString(),
+            customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value },
+            fulfillment: fulfillmentType,
+            address: fulfillmentType === 'delivery' ? document.getElementById('cust-address').value : null,
+            items: [...cart],
+            total: document.getElementById('checkout-total').innerText
         };
-        function delP(id) { products = products.filter(p => p.id !== id); render(); }
-        render();
-    </script>
+        currentReceiptData = orderData;
+        orders.unshift(orderData);
+        localStorage.setItem('core_orders', JSON.stringify(orders)); // Save order immediately
+        closeCheckout();
+        showReport(orderData);
+    }
+
+    function showReport(order) {
+        const modal = document.getElementById('report-modal');
+        const loader = document.getElementById('report-loading');
+        const content = document.getElementById('report-content');
+        const receipt = document.getElementById('user-receipt');
+        modal.style.display = 'flex';
+        loader.style.display = 'block';
+        content.style.display = 'none';
+
+        receipt.innerHTML = `
+            <div style="margin-bottom:10px; font-size:0.8rem; border-bottom:1px solid var(--border); padding-bottom:10px">
+                <strong>Order ID:</strong> #${order.id}<br><strong>Date:</strong> ${order.date}
+            </div>
+            <div style="margin-bottom:10px">${order.items.map(i => `<div style="display:flex; justify-content:space-between"><span>${i.name}</span><span>$${i.price}</span></div>`).join('')}</div>
+            <div style="display:flex; justify-content:space-between; font-weight:700; color:var(--accent); font-size:1.1rem; border-top:1px solid var(--border); padding-top:10px">
+                <span>Total</span><span>${order.total}</span>
+            </div>
+            <div style="margin-top:15px; font-size:0.8rem;">
+                <strong>Fulfillment:</strong> ${order.fulfillment.toUpperCase()}<br>
+                ${order.address ? `<strong>Address:</strong> ${order.address}` : '<strong>Pickup:</strong> CORE Store Main'}
+            </div>`;
+
+        setTimeout(() => {
+            loader.style.display = 'none'; content.style.display = 'block';
+            cart = []; updateCart(); render();
+        }, 1500);
+    }
+
+    function downloadReceipt() {
+        if(!currentReceiptData) return;
+        const o = currentReceiptData;
+        let text = `CORE ENTERPRISE RECEIPT\nOrder ID: #${o.id}\nDate: ${o.date}\n\nITEMS:\n`;
+        o.items.forEach(i => text += `- ${i.name}: $${i.price}\n`);
+        text += `\nTOTAL: ${o.total}\nMETHOD: ${o.fulfillment.toUpperCase()}`;
+        if(o.address) text += `\nADDRESS: ${o.address}`;
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `CORE_Receipt_${o.id}.txt`;
+        a.click(); URL.revokeObjectURL(url);
+    }
+
+    function closeReport() { document.getElementById('report-modal').style.display = 'none'; }
+    
+    function switchAdminTab(tab) {
+        document.getElementById('tab-inventory').classList.toggle('active', tab === 'inventory');
+        document.getElementById('tab-orders').classList.toggle('active', tab === 'orders');
+        document.getElementById('view-inventory').style.display = tab === 'inventory' ? 'grid' : 'none';
+        document.getElementById('view-orders').style.display = tab === 'orders' ? 'block' : 'none';
+        lucide.createIcons();
+    }
+
+    function deleteOrder(id) { 
+        orders = orders.filter(o => o.id !== id); 
+        localStorage.setItem('core_orders', JSON.stringify(orders)); // Sync delete
+        render(); 
+    }
+
+    function openProductModal(id) {
+        const p = products.find(x => x.id === id);
+        if(!p) return;
+        document.getElementById('modal-img').src = p.img;
+        document.getElementById('modal-title').innerText = p.name;
+        document.getElementById('modal-price').innerText = `$${p.price.toLocaleString()}`;
+        document.getElementById('modal-desc').innerText = p.desc || "Enterprise hardware.";
+        
+        let specHtml = `<div class="spec-item"><strong>Warranty</strong><span>${p.warranty || '2 Years'}</span></div>`;
+        if (p.specs) {
+            for(let key in p.specs) {
+                specHtml += `<div class="spec-item"><strong>${key}</strong><span>${p.specs[key]}</span></div>`;
+            }
+        }
+        document.getElementById('modal-specs').innerHTML = specHtml;
+        document.getElementById('modal-add-btn').onclick = () => addToCart(p.id);
+        document.getElementById('product-modal').style.display = 'flex';
+    }
+
+    function closeProductModal() { document.getElementById('product-modal').style.display = 'none'; }
+    
+    function addToCart(id) {
+        const item = products.find(p => p.id === id);
+        cart.push(item); updateCart();
+        const t = document.getElementById('toast');
+        t.innerText = `Added ${item.name} to bag`;
+        t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function updateCart() {
+        document.getElementById('cart-badge').innerText = cart.length;
+        document.getElementById('cart-list').innerHTML = cart.map((item, i) => `
+            <div style="display:flex; gap:12px; padding: 15px; align-items:center">
+                <img src="${item.img}" style="width:40px; height:40px; border-radius:5px; object-fit:cover">
+                <div style="flex-grow:1"><strong>${item.name}</strong><br>$${item.price}</div>
+                <i data-lucide="trash" size="14" style="color:red; cursor:pointer" onclick="cart.splice(${i},1); updateCart();"></i>
+            </div>`).join('');
+        document.getElementById('total-price').innerText = "$" + cart.reduce((s, i) => s + i.price, 0).toLocaleString();
+        lucide.createIcons();
+    }
+
+    function toggleTheme() {
+        const b = document.body;
+        const newTheme = b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        b.setAttribute('data-theme', newTheme);
+        localStorage.setItem('core_theme', newTheme);
+        lucide.createIcons();
+    }
+
+    function togglePanel(id) {
+        const p = document.getElementById(id);
+        if(id === 'admin-panel') p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        else p.classList.toggle('open');
+        lucide.createIcons();
+    }
+
+    function openAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
+    function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+    function doLogin() {
+        if(document.getElementById('user').value === 'admin' && document.getElementById('pass').value === '123') {
+            closeAuth(); togglePanel('admin-panel');
+        } else alert("Wrong credentials");
+    }
+
+    function saveNewProduct() {
+        const n = document.getElementById('p-name').value;
+        const p = document.getElementById('p-price').value;
+        const d = document.getElementById('p-desc').value;
+        const s = document.getElementById('p-specs').value; 
+        
+        if(n && p && tempImg) {
+            const specsObj = {};
+            if(s) {
+                s.split(',').forEach(pair => {
+                    const [key, val] = pair.split(':');
+                    if(key && val) specsObj[key.trim()] = val.trim();
+                });
+            }
+            products.unshift({ 
+                id: Date.now(), 
+                name: n, 
+                cat: document.getElementById('p-cat').value, 
+                price: parseInt(p), 
+                img: tempImg, 
+                desc: d,
+                specs: specsObj 
+            });
+
+            // Save immediately to storage
+            localStorage.setItem('core_products', JSON.stringify(products));
+
+            // Reset inputs
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-price').value = '';
+            document.getElementById('p-desc').value = '';
+            document.getElementById('p-specs').value = '';
+            document.getElementById('prev').style.display = 'none';
+            tempImg = "";
+            render(); 
+            alert("Product saved permanently!");
+        } else alert("Fill name, price, and upload image");
+    }
+
+    document.getElementById('file-in').onchange = (e) => {
+        const r = new FileReader();
+        r.onload = (ev) => { 
+            tempImg = ev.target.result; 
+            document.getElementById('prev').src = tempImg; 
+            document.getElementById('prev').style.display = 'block'; 
+        };
+        r.readAsDataURL(e.target.files[0]);
+    };
+
+    function delP(id) { 
+        if(confirm("Permanently delete this product?")) {
+            products = products.filter(p => p.id !== id); 
+            localStorage.setItem('core_products', JSON.stringify(products)); // Sync delete to storage
+            render(); 
+        }
+    }
+
+    // Initialize the page
+    render();
+</script>
 </body>
 </html>
